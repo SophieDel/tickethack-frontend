@@ -1,59 +1,70 @@
-// fetch('http://localhost:3000/bookings')
-// 	.then(response => response.json())
-// 	.then(data => {
-// 		if (data.bookings) {
-// 			for (let i = 0; i < data.bookings.length; i++) {
-// 				document.querySelector('#bookingsList').innerHTML += `
-// 			<div class="bookings">
-// 				<p class="name">${data.bookings[i]}</p>
-// 			</div>
-// 			`;
-// 			} else {
-//             }
-// 			updateDeleteCityEventListener();
-// 		}
-// 	});
+function createNewJourney(id, departure, arrival, date, price) {
+  let html = `<div id=${id} class="trips">
+    <div class="cities">${departure} > ${arrival}</div>
+    <div class="hour">${new Date(date).getHours()} : ${new Date(
+    date
+  ).getMinutes()}</div>
+    <div class="price">${price}</div>
+<button id="book">Book</button>
+</div>`;
+  return html;
+}
 
-// fetch('http://localhost:3000/home')
-// 	.then(response => response.json())
-// 	.then(data => {
-//         console.log(data)
-// 		if (data.result) {
-// 			for (let i = 0; i < data.trips.length; i++) {
-// 				document.querySelector('#departure').innerHTML += `
-// 			<div  id="masterTrajets" >
-// 				<p id="departure">${data.home[i].departure}</p>
-//             </div> 
-            
-//             <div  id="masterTrajets" >
-// 				<p id="arrival">${data.arrival[i].arrival}</p>
-// 			</div>
-// 			`;
-// 			}
-// 		} else {
-//             document.querySelector("xxx").innerHTML +=
-
-//         }
-
-//         updateDeleteCityEventListener();
-// 	});
-
-    document.querySelector('#search').addEventListener('click', function () {
-        const user = {
-            departure: document.querySelector('#departure').value,
-            arrival: document.querySelector('#arrival').value,
-            date: document.querySelector('#date').value,
+document.querySelector("#search").addEventListener("click", function () {
+  fetch("http://localhost:3000/search", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      departure: document.querySelector("#departure").value,
+      arrival: document.querySelector("#arrival").value,
+      date: document.querySelector("#calendar").value,
+    }),
+  })
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      console.log(data.result);
+      if (data.result) {
+        // Suppression du contenu de la div de résultat
+        let resultElement = document.querySelector("#result");
+        if (resultElement.childNodes) {
+          while (resultElement.firstChild) {
+            resultElement.removeChild(resultElement.firstChild);
+          }
         }
-    
-        fetch('http://localhost:3000/users/signin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(user),
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.result) {
-                    window.location.assign('index.html');
-                }
-            });
+        let trips = data.trips;
+        for (let i = 0; i < trips.length; i++) {
+          // Ajout du contenu HTML pour chaque trip trouvé
+          let trip = trips[i];
+          console.log(
+            trip._id,
+            trip.departure,
+            trip.arrival,
+            trip.date,
+            trip.price
+          );
+          let tripHtml = createNewJourney(
+            trip._id,
+            trip.departure,
+            trip.arrival,
+            trip.date,
+            trip.price
+          );
+          console.log(tripHtml);
+          document.querySelector("#result").innerHTML += tripHtml;
+        }
+      } else {
+        let resultElement = document.querySelector("#result");
+        if (resultElement.childNodes) {
+          while (resultElement.firstChild) {
+            resultElement.removeChild(resultElement.firstChild);
+          }
+        }
+        document.querySelector("#result").innerHTML += `<div id="emptyCart">
+                    <img src="images/notfound.png" />
+                    <div class="divider">No trip found</div>
+                  </div>`;
+      }
     });
+});
