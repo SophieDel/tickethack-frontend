@@ -5,7 +5,7 @@ function createNewJourney(id, departure, arrival, date, price) {
     date
   ).getMinutes()}</div>
     <div class="price">${price}</div>
-<button id="book">Book</button>
+<button class="book">Book</button>
 </div>`;
   return html;
 }
@@ -51,9 +51,27 @@ document.querySelector("#search").addEventListener("click", function () {
             trip.date,
             trip.price
           );
-          console.log(tripHtml);
           document.querySelector("#result").innerHTML += tripHtml;
         }
+        document.querySelectorAll(".book").forEach((item) => {
+            console.log("toto", item.parentNode.id)
+          item.addEventListener("click", function () {
+            fetch("http://localhost:3000/carts", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id: item.parentNode.id,
+              }),
+            })
+              .then((response) => {
+                return response.json();
+              })
+              .then((data) => {
+                console.log(data);
+                //window.location.assign("cart.html");
+              });
+          });
+        });
       } else {
         let resultElement = document.querySelector("#result");
         if (resultElement.childNodes) {
